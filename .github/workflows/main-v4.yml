@@ -34,13 +34,13 @@ jobs:
           -t "${{ inputs.tag }} - ${{ inputs.title }}"
           ${{ inputs.tag }}
       - name: "Get binaries"
-        id: curl
-        uses: dedene/curl@v1
-        with:
-          url: https://raw.githubusercontent.com/regorxxx/foobar2000-assets/main/Spider%20Monkey%20Panel/foo_spider_monkey_panel-v1.6.1-mod.fb2k-component
-          args: -v
+        run: |
+          curl -H 'Authorization: token ${{ secrets.GITHUB_TOKEN }}' \
+          -H 'Accept: application/vnd.github.v4.raw' \
+          -O \
+          -L https://api.github.com/repos/regorxxx/foobar2000-assets/contents/Spider%20Monkey%20Panel/foo_spider_monkey_panel-v1.6.1-mod.fb2k-component    
       - uses: AButler/upload-release-assets@v3.0
         with:
-          files: "${{ steps.curl.outputs.curl_output }}"
+          files: "foo_spider_monkey_panel-v1.6.1-mod.fb2k-component"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ inputs.tag }}
