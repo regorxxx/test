@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
         with:
-          repo: ${{ inputs.tag }}
+          repository: ${{ inputs.tag }}
           fetch-tags: true
       - uses: CSchoel/release-notes-from-changelog@v1.3.0
       - name: Create Release using GitHub CLI
