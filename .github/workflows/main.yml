@@ -4,6 +4,11 @@ name: Manual workflow
 # or API.
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag: (v.x.x.x)'
+        required: true
+        type: string
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -13,6 +18,8 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4.1.1
+        with:
+          repository: ${{ inputs.tag }}
       - uses: CSchoel/release-notes-from-changelog@v1.3.0
       - name: Create Release using GitHub CLI
         env:
