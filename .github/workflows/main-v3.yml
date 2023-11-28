@@ -9,6 +9,10 @@ on:
         description: 'Release tag: (vX.X.X)'
         required: true
         type: string
+      title:
+        description: 'Release title:'
+        required: false
+        type: string
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -27,8 +31,8 @@ jobs:
         run: >
           gh release create
           -F RELEASE.md
-          -t "Version ${{ inputs.tag }}"
-          ${GITHUB_REF#refs/*/}
+          -t "${{ inputs.title }}"
+           ${{ inputs.tag }}
       - uses: AButler/upload-release-assets@v3.0
         with:
           files: "packages/foo_spider_monkey_panel-v1.6.1-mod.fb2k-component"
