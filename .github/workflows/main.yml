@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag: (v.x.x.x)'
+        description: 'Release tag: (vx.x.x)'
         required: true
         type: string
 
@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
         with:
-          repository: ${{ inputs.tag }}
+          fetch-tags: true
       - uses: CSchoel/release-notes-from-changelog@v1.3.0
       - name: Create Release using GitHub CLI
         env:
