@@ -33,8 +33,14 @@ jobs:
           -F RELEASE.md
           -t "${{ inputs.tag }} - ${{ inputs.title }}"
           ${{ inputs.tag }}
+      - name: cURL with output
+        id: curl
+        uses: dedene/curl@v1
+        with:
+          url: https://raw.githubusercontent.com/regorxxx/foobar2000-assets/main/Spider%20Monkey%20Panel/foo_spider_monkey_panel-v1.6.1-mod.fb2k-component
+          args: -v
       - uses: AButler/upload-release-assets@v3.0
         with:
-          files: "https://github.com/regorxxx/foobar2000-assets/raw/main/Spider%20Monkey%20Panel/foo_spider_monkey_panel-v1.6.1-mod.fb2k-component"
+          files: "${{ outputs.curl.curl_output }}"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ inputs.tag }}
