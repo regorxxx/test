@@ -32,7 +32,7 @@ jobs:
           gh release create
           -F RELEASE.md
           -t "${{ inputs.title }}"
-           ${{ inputs.tag }}
+          ${{ inputs.tag }}
       - uses: AButler/upload-release-assets@v3.0
         with:
           files: "packages/foo_spider_monkey_panel-v1.6.1-mod.fb2k-component"
