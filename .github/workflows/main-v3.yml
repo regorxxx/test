@@ -31,7 +31,7 @@ jobs:
         run: >
           gh release create
           -F RELEASE.md
-          -t "${{ inputs.title }}"
+          -t "${{ inputs.tag }} - ${{ inputs.title }}"
           ${{ inputs.tag }}
       - uses: AButler/upload-release-assets@v3.0
         with:
