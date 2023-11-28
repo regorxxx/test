@@ -1,4 +1,4 @@
-name: Manual workflow
+name: Create release with input
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
@@ -18,10 +18,9 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4.1.1
-        with:
-          repository: ${{ inputs.tag }}
-          fetch-tags: true
       - uses: CSchoel/release-notes-from-changelog@v1.3.0
+        with:
+          version: ${{ inputs.tag }}
       - name: Create Release using GitHub CLI
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
