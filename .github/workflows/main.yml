@@ -1,0 +1,26 @@
+name: Manual workflow
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    name: "My fancy build"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - uses: CSchoel/release-notes-from-changelog@v1.3.0
+      - name: Create Release using GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh release create
+          -d
+          -F RELEASE.md
+          -t "Version $RELEASE_VERSION"
+          ${GITHUB_REF#refs/*/}
+          ps3-cloud-drive.pkg
