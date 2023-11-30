@@ -1,7 +1,5 @@
 name: Create release + SMP + package
 
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
 on:
   workflow_dispatch:
     inputs:
@@ -14,8 +12,8 @@ on:
         required: false
         type: string
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # Create new release + Tag
   release:
     name: "Create release"
     runs-on: ubuntu-latest
@@ -38,9 +36,9 @@ jobs:
           -F RELEASE.md
           -t "${{ inputs.tag }} - ${{ inputs.title }}"
           ${{ inputs.tag }}
-
+  # Attach assets
   mod:
-    name: "Attatch SMP mod"
+    name: "Attach SMP mod"
     runs-on: ubuntu-latest
     
     steps:
@@ -55,9 +53,9 @@ jobs:
           files: "foo_spider_monkey_panel-v1.6.1-mod.fb2k-component"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ inputs.tag }}
-
+  # Build and attach package
   package:
-    name: "Attatch Package"
+    name: "Attach Package"
     runs-on: windows-latest
     
     steps:
