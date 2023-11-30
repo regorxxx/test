@@ -69,6 +69,7 @@ jobs:
             ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => 3
             ${{ 'Timeline-SMP' == github.event.repository.name }} => 4
       - uses: actions/checkout@v4.1.1
+        if: ${{ steps.switch-case.outputs.value != 0 }}
       - name: "Create package"
         if: ${{ steps.switch-case.outputs.value != 0 }}
         run: ./_createPackage.bat ${{ steps.switch-case.outputs.value }}
