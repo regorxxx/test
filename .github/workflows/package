@@ -1,0 +1,36 @@
+name: Create release + SMP + package
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  # Build and attach package
+  package:
+    name: "Attach Package"
+    runs-on: windows-latest
+    
+    steps:
+      - uses: thaitype/actions-switch-case@v1
+        id: switch-case
+        with:
+          default: 1
+          conditionals-with-values: |
+            ${{ 'World-Map-SMP' == github.event.repository.name }} => 1
+            ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => 2
+            ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => 3
+            ${{ 'Timeline-SMP' == github.event.repository.name }} => 4
+      - uses: actions/checkout@v4.1.1
+        if: ${{ steps.switch-case.outputs.value != 0 }}
+      - name: "Create package"
+        if: ${{ steps.switch-case.outputs.value != 0 }}
+        run: ./_createPackage.bat ${{ steps.switch-case.outputs.value }}
+      - name: 'Upload Artifact'
+        if: ${{ steps.switch-case.outputs.value != 0 }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: package.zip
+          retention-days: 5
+      - name: "No package associated to repository"
+        if: ${{ steps.switch-case.outputs.value == 0 }}
+        run: echo 'No package associated'
