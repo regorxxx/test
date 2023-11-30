@@ -19,7 +19,8 @@ jobs:
             ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => 2
             ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => 3
             ${{ 'Timeline-SMP' == github.event.repository.name }} => 4
-      - run: echo '${{ steps.package.outputs.value }}'
+      - name: Echo the result
+        run: echo ${{ steps.package.outputs.match }}
       - uses: actions/checkout@v4.1.1
         if: ${{ steps.package.outputs.value != 0 }}
       - name: "Create package"
