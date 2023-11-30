@@ -70,7 +70,7 @@ jobs:
             ${{ 'Playlist-Manager-SMP' == ${{ github.event.repository.name }} }} => 2
             ${{ 'Not-a-Waveform-Seekbar-SMP' == ${{ github.event.repository.name }} }} => 3
             ${{ 'Timeline-SMP' == ${{ github.event.repository.name }} }} => 3
-        run: ./_createPackage.bat ${{ steps.switch-case.outputs.value }}
+      - run: ./_createPackage.bat ${{ steps.switch-case.outputs.value }}
       - uses: AButler/upload-release-assets@v3.0
         with:
           files: "packages/*.zip"
