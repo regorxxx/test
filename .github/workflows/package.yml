@@ -13,26 +13,24 @@ jobs:
       - uses: thaitype/actions-switch-case@v1
         id: package
         with:
-          default: 1
+          default: '1'
           conditionals-with-values: |
-            ${{ 'World-Map-SMP' == github.event.repository.name }} => 1
-            ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => 2
-            ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => 3
-            ${{ 'Timeline-SMP' == github.event.repository.name }} => 4
-      - name: Echo the result
-        run: echo ${{ steps.package.outputs.match }}
+            ${{ 'World-Map-SMP' == github.event.repository.name }} => '1'
+            ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => '2'
+            ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => '3'
+            ${{ 'Timeline-SMP' == github.event.repository.name }} => '4'
       - uses: actions/checkout@v4.1.1
-        if: ${{ steps.package.outputs.value != 0 }}
+        if: ${{ steps.package.outputs.value != '0' }}
       - name: "Create package"
-        if: ${{ steps.package.outputs.value != 0 }}
+        if: ${{ steps.package.outputs.value != '0' }}
         run: ./_createPackage.bat ${{ steps.package.outputs.value }}
       - name: 'Upload Artifact'
-        if: ${{ steps.package.outputs.value != 0 }}
+        if: ${{ steps.package.outputs.value != '0' }}
         uses: actions/upload-artifact@v3
         with:
           name: package
           path: package.zip
           retention-days: 5
       - name: "No package associated to repository"
-        if: ${{ steps.package.outputs.value == 0 }}
+        if: ${{ steps.package.outputs.value == '0' }}
         run: echo 'No package associated'
