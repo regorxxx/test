@@ -63,7 +63,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
       - name: "Create package"
-        run: _createPackage.bat 2
+        run: ./_createPackage.bat 2
       - uses: AButler/upload-release-assets@v3.0
         with:
           files: "packages/*.zip"
