@@ -11,7 +11,7 @@ jobs:
     
     steps:
       - uses: thaitype/actions-switch-case@v1
-        id: switch-case
+        id: package
         with:
           default: 1
           conditionals-with-values: |
@@ -19,19 +19,19 @@ jobs:
             ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => 2
             ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => 3
             ${{ 'Timeline-SMP' == github.event.repository.name }} => 4
-      - run: echo ${{ steps.switch-case.outputs.value }}
+      - run: echo '${{ steps.package.outputs.value }}'
       - uses: actions/checkout@v4.1.1
-        if: ${{ steps.switch-case.outputs.value != 0 }}
+        if: ${{ steps.package.outputs.value != 0 }}
       - name: "Create package"
-        if: ${{ steps.switch-case.outputs.value != 0 }}
-        run: ./_createPackage.bat ${{ steps.switch-case.outputs.value }}
+        if: ${{ steps.package.outputs.value != 0 }}
+        run: ./_createPackage.bat ${{ steps.package.outputs.value }}
       - name: 'Upload Artifact'
-        if: ${{ steps.switch-case.outputs.value != 0 }}
+        if: ${{ steps.package.outputs.value != 0 }}
         uses: actions/upload-artifact@v3
         with:
           name: package
           path: package.zip
           retention-days: 5
       - name: "No package associated to repository"
-        if: ${{ steps.switch-case.outputs.value == 0 }}
+        if: ${{ steps.package.outputs.value == 0 }}
         run: echo 'No package associated'
