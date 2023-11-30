@@ -20,19 +20,19 @@ jobs:
             ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => '3'
             ${{ 'Timeline-SMP' == github.event.repository.name }} => '4'
       - name: 'echo'
-        run: echo ${{ steps.package.outputs.match }} ${{ steps.package.outputs.value == '1' }}
+        run: echo ${{ steps.package.outputs.match }}
       - uses: actions/checkout@v4.1.1
-        if: ${{ steps.package.outputs.value != '0' }}
+        if: ${{ steps.package.outputs.match != '0' }}
       - name: "Create package"
-        if: ${{ steps.package.outputs.value != '0' }}
+        if: ${{ steps.package.outputs.match != '0' }}
         run: ./_createPackage.bat ${{ steps.package.outputs.value }}
       - name: 'Upload Artifact'
-        if: ${{ steps.package.outputs.value != '0' }}
+        if: ${{ steps.package.outputs.match != '0' }}
         uses: actions/upload-artifact@v3
         with:
           name: package
           path: package.zip
           retention-days: 5
       - name: "No package associated to repository"
-        if: ${{ steps.package.outputs.value == '0' }}
+        if: ${{ steps.package.outputs.match == '0' }}
         run: echo 'No package associated'
