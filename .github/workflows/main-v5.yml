@@ -79,3 +79,4 @@ jobs:
           release-tag: ${{ inputs.tag }}
       - name: "No package associated to repository"
         if: ${{ steps.switch-case.outputs.value = 0 }}
+        run: ECHO 'No package associated'
