@@ -64,10 +64,10 @@ jobs:
         with:
           default: 0
           conditionals-with-values: |
-            ${{ 'World-Map-SMP' == ${{ github.event.repository.name }} }} => 1
-            ${{ 'Playlist-Manager-SMP' == ${{ github.event.repository.name }} }} => 2
-            ${{ 'Not-a-Waveform-Seekbar-SMP' == ${{ github.event.repository.name }} }} => 3
-            ${{ 'Timeline-SMP' == ${{ github.event.repository.name }} }} => 3
+            ${{ 'World-Map-SMP' == github.event.repository.name }} => 1
+            ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => 2
+            ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => 3
+            ${{ 'Timeline-SMP' == github.event.repository.name }} => 4
       - uses: actions/checkout@v4.1.1
       - name: "Create package"
         run: ./_createPackage.bat ${{ steps.switch-case.outputs.value }}
