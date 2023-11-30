@@ -1,4 +1,4 @@
-name: Delete old workflow runs
+name: Clean workflow runs
 on:
   workflow_dispatch:
   schedule:
@@ -6,7 +6,7 @@ on:
 # Run monthly, at 00:00 on the 1st day of month.
 
 jobs:
-  del_runs:
+  delete:
     runs-on: ubuntu-latest
     permissions:
       actions: write
@@ -16,5 +16,5 @@ jobs:
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
-          retain_days: 1
+          retain_days: 0
           keep_minimum_runs: 1
