@@ -1,4 +1,4 @@
-name: Create release + SMP + package
+name: Package
 
 on:
   workflow_dispatch:
