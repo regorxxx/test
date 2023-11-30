@@ -13,12 +13,12 @@ jobs:
       - uses: thaitype/actions-switch-case@v1
         id: package
         with:
-          default: '1'
+          default: 1
           conditionals-with-values: |
-            ${{ 'World-Map-SMP' == github.event.repository.name }} => '1'
-            ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => '2'
-            ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => '3'
-            ${{ 'Timeline-SMP' == github.event.repository.name }} => '4'
+            ${{ 'World-Map-SMP' == github.event.repository.name }} => 1
+            ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => 2
+            ${{ 'Not-a-Waveform-Seekbar-SMP' == github.event.repository.name }} => 3
+            ${{ 'Timeline-SMP' == github.event.repository.name }} => 4
       - name: 'echo'
         run: echo ${{ steps.package.outputs.value }} ${{ steps.package.outputs.value == '1' }}
       - uses: actions/checkout@v4.1.1
