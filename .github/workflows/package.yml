@@ -13,7 +13,7 @@ jobs:
       - uses: thaitype/actions-switch-case@v1
         id: package
         with:
-          default: '1'
+          default: '2'
           conditionals-with-values: |
             ${{ 'World-Map-SMP' == github.event.repository.name }} => '1'
             ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => '2'
