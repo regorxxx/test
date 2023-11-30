@@ -70,9 +70,12 @@ jobs:
             ${{ 'Timeline-SMP' == github.event.repository.name }} => 4
       - uses: actions/checkout@v4.1.1
       - name: "Create package"
+        if: ${{ steps.switch-case.outputs.value != 0 }}
         run: ./_createPackage.bat ${{ steps.switch-case.outputs.value }}
       - uses: AButler/upload-release-assets@v3.0
         with:
           files: "packages/*.zip"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ inputs.tag }}
+      - name: "No package associated to repository"
+        if: ${{ steps.switch-case.outputs.value = 0 }}
