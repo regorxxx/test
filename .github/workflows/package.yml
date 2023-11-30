@@ -2,6 +2,7 @@ name: Package
 
 on:
   workflow_dispatch:
+  push:
   
 jobs:
   # Build and attach package
@@ -13,7 +14,7 @@ jobs:
       - uses: thaitype/actions-switch-case@v1
         id: package
         with:
-          default: '2'
+          default: '0'
           conditionals-with-values: |
             ${{ 'World-Map-SMP' == github.event.repository.name }} => '1'
             ${{ 'Playlist-Manager-SMP' == github.event.repository.name }} => '2'
