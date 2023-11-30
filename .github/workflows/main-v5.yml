@@ -59,8 +59,6 @@ jobs:
     runs-on: windows-latest
     
     steps:
-      - uses: actions/checkout@v4.1.1
-      - name: "Create package"
       - uses: thaitype/actions-switch-case@v1
         id: switch-case
         with:
@@ -70,7 +68,9 @@ jobs:
             ${{ 'Playlist-Manager-SMP' == ${{ github.event.repository.name }} }} => 2
             ${{ 'Not-a-Waveform-Seekbar-SMP' == ${{ github.event.repository.name }} }} => 3
             ${{ 'Timeline-SMP' == ${{ github.event.repository.name }} }} => 3
-      - run: ./_createPackage.bat ${{ steps.switch-case.outputs.value }}
+      - uses: actions/checkout@v4.1.1
+      - name: "Create package"
+        run: ./_createPackage.bat ${{ steps.switch-case.outputs.value }}
       - uses: AButler/upload-release-assets@v3.0
         with:
           files: "packages/*.zip"
