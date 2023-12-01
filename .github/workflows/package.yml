@@ -3,6 +3,7 @@ name: Package
 on:
   workflow_dispatch:
   push:
+  pull_request:
   
 jobs:
   # Build and attach package
