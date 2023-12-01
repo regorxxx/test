@@ -12,7 +12,7 @@ jobs:
     
     steps:
       - name: Debounce 5 minutes
-        uses: zachary95/github-actions-debounce@0.1.0
+        uses: zachary95/github-actions-debounce@v0.1.0
         with:
           wait: 300
       - uses: thaitype/actions-switch-case@v1
