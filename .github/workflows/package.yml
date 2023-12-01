@@ -11,6 +11,10 @@ jobs:
     runs-on: windows-latest
     
     steps:
+      - name: Debounce 5 minutes
+        uses: zachary95/github-actions-debounce@0.1.0
+        with:
+          wait: 300
       - uses: thaitype/actions-switch-case@v1
         id: package
         with:
