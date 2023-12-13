@@ -37,7 +37,7 @@ jobs:
           version: ${{ inputs.tag }}
       - name: 'Create Release using GitHub CLI'
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
         run: >
           gh release create
           -F RELEASE.md
