@@ -43,6 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
         with:
+          fetch-depth: 0
           ref: ${{ needs.update-changelog.outputs.commit_hash }}
       - name: Bump version and push tag
         uses: mathieudutour/github-tag-action@v6.1
