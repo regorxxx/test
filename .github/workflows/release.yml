@@ -15,10 +15,9 @@ on:
 jobs:
   # Bump version
   update-version:
+    name: 'Bump version'
     runs-on: ubuntu-latest
-    outputs:
-      commit_hash: ${{ steps.commit-and-push.outputs.commit_hash }}
-    
+
     steps:
       - uses: actions/checkout@v4.1.1
       - name: Write version to file
@@ -42,7 +41,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
         with:
-          ref: ${{ needs.update-changelog.outputs.commit_hash }}
+          fetch-depth: 0
+          ref: ${{ github.ref }}
       - name: Bump version and push tag
         uses: mathieudutour/github-tag-action@v6.1
         with:
