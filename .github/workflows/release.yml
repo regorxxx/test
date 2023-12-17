@@ -30,7 +30,10 @@ jobs:
         uses: actions-js/push@master
         with:
           github_token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
+          author_email: ''
+          author_name: ''
           message: 'Bump version by Github Actions'
+      - uses: actions/checkout@v4.1.1
       - name: Bump version and push tag
         uses: mathieudutour/github-tag-action@v6.1
         with:
