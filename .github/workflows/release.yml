@@ -34,6 +34,8 @@ jobs:
         with:
           github_token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
           commit_message: Bump version by Github Actions
+          commit_user_email: ${{ github.actor }}@users.noreply.github.com
+          commit_user_name: ${{ github.actor }}
   # Create new release + Tag
   release:
     needs: update-version
