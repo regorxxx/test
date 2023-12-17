@@ -29,6 +29,8 @@ jobs:
           else
             echo "exists=false" >> $GITHUB_OUTPUT;
           fi
+      - name: 'Result'
+        run: echo 'Key found: ${{ steps.key-check.outputs.exists == '0' }}'
   # Bump version
   update-version:
     needs: [check-key]
@@ -36,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       commit_hash: ${{ steps.commit-and-push.outputs.commit_hash }}
-    
+
     steps:
       - uses: actions/checkout@v4.1.1
       - name: Write version to file
@@ -65,7 +67,7 @@ jobs:
     needs: [update-version,check-key]
     name: 'Create release'
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4.1.1
         with:
@@ -110,14 +112,14 @@ jobs:
     needs: release
     name: 'Attach SMP mod'
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 'Get binaries'
         run: |
           curl -H 'Authorization: token ${{ secrets.GITHUB_TOKEN }}' \
           -H 'Accept: application/vnd.github.v4.raw' \
           -O \
-          -L https://api.github.com/repos/regorxxx/foobar2000-assets/contents/Spider%20Monkey%20Panel/foo_spider_monkey_panel-v1.6.1-mod.fb2k-component    
+          -L https://api.github.com/repos/regorxxx/foobar2000-assets/contents/Spider%20Monkey%20Panel/foo_spider_monkey_panel-v1.6.1-mod.fb2k-component
       - uses: AButler/upload-release-assets@v3.0
         with:
           files: 'foo_spider_monkey_panel-v1.6.1-mod.fb2k-component'
@@ -128,7 +130,7 @@ jobs:
     needs: release
     name: 'Attach Package'
     runs-on: windows-latest
-    
+
     steps:
       - uses: thaitype/actions-switch-case@v1
         id: switch-case
