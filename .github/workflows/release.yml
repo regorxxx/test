@@ -43,7 +43,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
           ref: ${{ needs.update-version.outputs.commit_hash }}
       - name: Bump version and push tag
         uses: mathieudutour/github-tag-action@v6.1
@@ -51,6 +50,7 @@ jobs:
           github_token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
           custom_tag: ${{ inputs.tag }}
           tag_prefix: 'v'
+          commit_sha: ${{ needs.update-version.outputs.commit_hash }}
       - name: 'Create readme header'
         shell: bash
         working-directory: '.'
