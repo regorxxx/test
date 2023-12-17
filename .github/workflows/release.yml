@@ -35,6 +35,7 @@ jobs:
           message: Bump version by Github Actions
   # Create new release + Tag
   release:
+    needs: update-version
     name: 'Create release'
     runs-on: ubuntu-latest
     
