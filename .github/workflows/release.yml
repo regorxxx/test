@@ -42,7 +42,6 @@ jobs:
           commit_message: Bump version by ${{ github.workflow}}
           commit_user_email: ${{ github.actor }}@users.noreply.github.com
           commit_user_name: ${{ github.actor }}
-          commit_options: '--signoff'
   # Create new release + Tag
   release:
     needs: update-version
