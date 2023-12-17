@@ -28,10 +28,9 @@ jobs:
           contents: |
             'v${{ inputs.tag }}'
       - name: Commit & Push
-        uses: Andro999b/push@v1.3
+        uses: actions-js/push@master
         with:
           github_token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
-          branch: 'main'
           message: 'Bump version by Github Actions - ${date}'
       - name: Bump version and push tag
         uses: mathieudutour/github-tag-action@v6.1
