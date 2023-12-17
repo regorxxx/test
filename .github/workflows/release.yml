@@ -13,8 +13,24 @@ on:
         type: string
 
 jobs:
+  # Check signing key
+  check-key:
+    runs-on: ubuntu-latest
+    outputs:
+      exists: ${{ steps.key-check.outputs.exists }}
+    steps:
+      - name: Check for signing key availability
+        id: key-check
+        shell: bash
+        run: |
+          if [ "${{ secrets.GPG_PRIVATE_KEY }}" != '' ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT;
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT;
+          fi
   # Bump version
   update-version:
+    needs: check-key
     name: 'Bump version'
     runs-on: ubuntu-latest
     outputs:
@@ -29,6 +45,7 @@ jobs:
           write-mode: overwrite
           contents: v${{ inputs.tag }}
       - name: Import GPG key
+        if: ${{ needs.check-key.outputs.exists == 'true' }}
         uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -44,7 +61,7 @@ jobs:
           commit_user_name: ${{ github.actor }}
   # Create new release + Tag
   release:
-    needs: update-version
+    needs: [update-version,check-key]
     name: 'Create release'
     runs-on: ubuntu-latest
     
@@ -53,6 +70,7 @@ jobs:
         with:
           ref: ${{ needs.update-version.outputs.commit_hash }}
       - name: Import GPG key
+        if: ${{ needs.check-key.outputs.exists == 'true' }}
         uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
