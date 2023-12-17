@@ -34,8 +34,7 @@ jobs:
       # Checkout again and force latest commit
       - uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
-          ref: main
+          ref: ${{ github.ref }}
       - name: Bump version and push tag
         uses: mathieudutour/github-tag-action@v6.1
         with:
