@@ -15,6 +15,7 @@ on:
 jobs:
   # Check signing key
   check-key:
+    name: 'Check key'
     runs-on: ubuntu-latest
     outputs:
       exists: ${{ steps.key-check.outputs.exists }}
@@ -30,7 +31,7 @@ jobs:
           fi
   # Bump version
   update-version:
-    needs: check-key
+    needs: [check-key]
     name: 'Bump version'
     runs-on: ubuntu-latest
     outputs:
