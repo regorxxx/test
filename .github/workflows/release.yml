@@ -17,7 +17,9 @@ jobs:
   update-version:
     name: 'Bump version'
     runs-on: ubuntu-latest
-
+    outputs:
+      commit_hash: ${{ steps.commit-and-push.outputs.commit_hash }}
+    
     steps:
       - uses: actions/checkout@v4.1.1
       - name: Write version to file
@@ -28,10 +30,10 @@ jobs:
           contents: v${{ inputs.tag }}
       - name: Commit & Push
         id: commit-and-push
-        uses: actions-js/push@master
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           github_token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
-          message: Bump version by Github Actions
+          commit_message: Bump version by Github Actions
   # Create new release + Tag
   release:
     needs: update-version
@@ -41,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ needs.update-changelog.outputs.commit_hash }}
       - name: Bump version and push tag
         uses: mathieudutour/github-tag-action@v6.1
         with:
