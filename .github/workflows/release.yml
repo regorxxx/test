@@ -30,8 +30,7 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT;
           fi
       - name: Result
-        run: |
-          echo 'Key found:  ${{ steps.key-check.outputs.exists }}'
+        run: echo "Key found:" ${{ steps.key-check.outputs.exists }}
   # Bump version
   update-version:
     needs: [check-key]
