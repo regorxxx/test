@@ -28,6 +28,13 @@ jobs:
           path: VERSION
           write-mode: overwrite
           contents: v${{ inputs.tag }}
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true  
       - name: Commit & Push
         id: commit-and-push
         uses: stefanzweifel/git-auto-commit-action@v5
