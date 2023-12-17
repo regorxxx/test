@@ -23,7 +23,7 @@ jobs:
       - name: Write version to file
         uses: "DamianReeves/write-file-action@master"
         with:
-          path: version
+          path: VERSION
           write-mode: overwrite
           contents: |
             'v${{ inputs.tag }}'
@@ -31,6 +31,7 @@ jobs:
         uses: Andro999b/push@v1.3
         with:
           github_token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
+          branch: 'main'
           message: 'Bump version by Github Actions - ${date}'
       - name: Bump version and push tag
         uses: mathieudutour/github-tag-action@v6.1
