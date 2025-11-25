@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Result
-        run: echo "Version - Title:" ${{ env.tag } || { inputs.tag }} " - " ${ env.title } || { inputs.title }}
+        run: echo "Version - Title:" ${{ env.tag  ||  inputs.tag }} " - " ${{env.title  ||  inputs.title }}
   # Check signing key
   check-key:
     needs: [input]
