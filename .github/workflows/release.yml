@@ -50,7 +50,7 @@ jobs:
           key_variable: 'tag'
           fail_on_empty: true
        - name: Output
-         run: echo  ${{ env.tag }} " - "  ${{ env.title }}
+         run: echo ${{ env.tag }} " - " ${{ env.title }}
   # Display input
   input:
     needs: [Automate]
