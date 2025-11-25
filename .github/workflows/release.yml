@@ -33,8 +33,6 @@ jobs:
           pretty: true
           key_variable: 'title'
           fail_on_empty: false
-        inputs:
-          tag: ${{ env.title }}
       - name: Extract version
         if: "github.event.head_commit.message && contains(github.event.head_commit.message, 'build:')"
         uses: somaz94/commit-info-extractor@v1
@@ -44,15 +42,13 @@ jobs:
           pretty: true
           key_variable: 'tag'
           fail_on_empty: true
-        inputs:
-          tag: ${{ env.tag }}
   # Display input
   input:
     name: 'Input'
     runs-on: ubuntu-latest
     steps:
       - name: Result
-        run: echo "Version - Title:" ${{ inputs.tag }} " - " ${{ inputs.title }}
+        run: echo "Version - Title:" ${{ env.tag }} || ${{ inputs.tag }} " - " ${{ env.title }} || ${{ inputs.title }}
   # Check signing key
   check-key:
     needs: [input]
