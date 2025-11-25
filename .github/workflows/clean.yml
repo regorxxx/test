@@ -1,9 +1,9 @@
-name: Clean workflow runs
+name: Clean workflow runs (automatic)
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
-# Run monthly, at 00:00 on the 1st day of month.
+    # Run daily, at 00:00
 
 jobs:
   delete:

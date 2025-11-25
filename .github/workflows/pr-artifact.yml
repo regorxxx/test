@@ -1,7 +1,7 @@
-name: Pull Request builds (automatic)
+name: Pull Request artifact (automatic)
 on:
   workflow_run:
-    workflows: ['Package']
+    workflows: ['Pull Request builds (automatic)']
     types: [completed]
 jobs:
   pr_comment:
