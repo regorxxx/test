@@ -27,6 +27,10 @@ jobs:
           gh run watch ${{ github.run_id }}
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Extract Title
         if: "github.event.head_commit.message && contains(github.event.head_commit.message, 'build:')"
         uses: somaz94/commit-info-extractor@v1
