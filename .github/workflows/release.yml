@@ -60,7 +60,7 @@ jobs:
       - name: Test
         if: "${{ (env.tag || inputs.tag) == '' }}"
         run: |
-          echo  ${{ (env.tag == '' }}  ${{ (env.tag || inputs.tag) }}  ${{ env.tag }}
+          echo  ${{ env.tag == '' }}  ${{ (env.tag || inputs.tag) }}  ${{ env.tag }}
           echo "No tag found"
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
