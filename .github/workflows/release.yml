@@ -26,7 +26,7 @@ jobs:
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -60,11 +60,12 @@ jobs:
       - name: Test
         if: ${{ (env.tag || inputs.tag) == '' }}
         run: |
+          echo  ${{ (env.tag || inputs.tag) == '' }}  ${{ (env.tag || inputs.tag) }}  ${{ env.tag }}
           echo "No tag found"
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
   # Check signing key
   check-key:
     needs: [input]
@@ -136,7 +137,7 @@ jobs:
       - name: Bump version and push tag
         uses: mathieudutour/github-tag-action@v6.1
         with:
-          github_token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
+          github_token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
           custom_tag: ${{ inputs.tag }}
           tag_prefix: 'v'
           commit_sha: ${{ needs.update-version.outputs.commit_hash }}
