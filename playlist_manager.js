@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/06/25
+//21/11/25
 
 /* 	Playlist Manager
 	Manager for Playlists Files and Auto-Playlists. Shows a virtual list of all playlists files within a configured folder (playlistPath).
@@ -8,16 +8,16 @@
 
 /* exported delayAutoUpdate, plsRwLock */
 
-if (!window.ScriptInfo.PackageId) { window.DefineScript('Playlist Manager', { author: 'regorxxx', version: '0.20.0', features: { drag_n_drop: true, grab_focus: true } }); }
+if (!window.ScriptInfo.PackageId) { window.DefineScript('Playlist-Manager-SMP', { author: 'regorxxx', version: '1.0.0-beta.4', features: { drag_n_drop: true, grab_focus: true } }); }
 
 include('helpers\\helpers_xxx.js');
-/* global globSettings:readable, folders:readable, checkCompatible:readable, checkUpdate:readable globTags:readable, popup:readable, debounce:readable, repeatFn:readable, isPortable:readable, MK_CONTROL:readable, VK_SHIFT:readable,, dropEffect:readable, IDC_WAIT:readable, VK_CONTROL:readable, MK_SHIFT:readable, IDC_ARROW:readable, IDC_HAND:readable, globProfiler:readable, globQuery:readable */
+/* global globSettings:readable, folders:readable, checkCompatible:readable, checkUpdate:readable globTags:readable, popup:readable, debounce:readable, repeatFn:readable, isPortable:readable, MK_CONTROL:readable, VK_SHIFT:readable,, dropEffect:readable, IDC_WAIT:readable, VK_CONTROL:readable, MK_SHIFT:readable, IDC_ARROW:readable, IDC_HAND:readable, globProfiler:readable, globQuery:readable, VK_ALT:readable */
 include('helpers\\helpers_xxx_flags.js');
 /* global VK_LWIN:readable, dropMask:readable */
 include('helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesValues:readable, getPropertyByKey:readable */
 include('helpers\\helpers_xxx_prototypes.js');
-/* global isInt:readable, isBoolean:readable, isStringWeak:readable, _t:readable, isJSON:readable, isString:readable, isUUID:readable, UUID:readable, _p:readable, range:readable, clone:readable */
+/* global isInt:readable, isBoolean:readable, isStringWeak:readable, _t:readable, isJSON:readable, isString:readable, isUUID:readable, UUID:readable, _p:readable, range:readable, clone:readable, _ps:readable */
 include('helpers\\helpers_xxx_prototypes_smp.js');
 /* global extendGR:readable */
 include('helpers\\helpers_xxx_playlists.js');
@@ -54,6 +54,8 @@ include('main\\playlist_manager\\playlist_manager_listenbrainz.js');
 /* global ListenBrainz:readable */
 include('main\\playlist_manager\\playlist_manager_statistics.js');
 /* global _listStatistics:readable */
+include('main\\window\\window_xxx_dynamic_colors.js');
+/* global dynamicColors:readable, mostContrastColor:readable */
 include('main\\window\\window_xxx_scrollbar.js');
 /* global _scrollBar:readable */
 
@@ -81,7 +83,7 @@ const cacheLib = (bInit = false, message = 'Loading...', tt = 'Caching library p
 		libItemsAbsPaths = []; // NOSONAR
 		libItemsRelPaths = {}; // NOSONAR
 		precacheLibraryPathsAsync().then(() => {
-			window.NotifyOthers('precacheLibraryPaths', [...libItemsAbsPaths]);
+			window.NotifyOthers('xxx-scripts: precacheLibraryPaths', [...libItemsAbsPaths]);
 			pop.disable(true);
 		}, () => {
 			// Already using data from other instance. See on_notify_data
@@ -110,31 +112,31 @@ const cacheLib = (bInit = false, message = 'Loading...', tt = 'Caching library p
 	} else {
 		if (!pop.isEnabled()) { pop.enable(true, message, tt, 'cacheLib waiting'); } // Disabled on notify
 		else { pop.setReason('cacheLib waiting'); }
-		window.NotifyOthers('precacheLibraryPaths ask', null);
+		window.NotifyOthers('xxx-scripts: precacheLibraryPaths ask', null);
 	}
 	return null;
 };
 const debouncedCacheLib = debounce(cacheLib, 5000);
 
 let properties = {
-	playlistsPath: ['Tracked playlists folder', '.\\profile\\playlist_manager\\', { func: isString, portable: true }, '.\\profile\\playlist_manager\\'],
-	autoSave: ['Auto-save delay with loaded playlists (in ms). Forced > 1000. 0 disables it.', 3000, { func: isInt, range: [[0, 0], [1000, Infinity]] }, 3000], // Safety limit 0 or > 1000
+	playlistsPath: ['Tracked playlists folder', '.\\profile\\playlist_manager\\', { func: isString, portable: true }],
+	autoSave: ['Auto-save delay with loaded playlists (in ms). Forced > 1000. 0 disables it.', 3000, { func: isInt, range: [[0, 0], [1000, Infinity]] }], // Safety limit 0 or > 1000
 	fplRules: ['fpl playlists behavior', JSON.stringify({
 		bLockOnLoad: true,
 		bNonTrackedSupport: true,
-	})],
-	extension: ['Extension used when saving playlists', '.m3u8', { func: (val) => writablePlaylistFormats.has(val) }, '.m3u8'],
-	autoUpdate: ['Periodically checks playlist path (in ms). Forced > 200. 0 disables it.', 5000, { func: isInt, range: [[0, 0], [200, Infinity]] }, 5000], // Safety limit 0 or > 200
-	bShowSize: ['Show playlist size', false, { func: isBoolean }, false],
-	bUpdateAutoPlaylist: ['Update AutoPlaylist size by query output', true, { func: isBoolean }, true],
-	bUseUUID: ['Use UUIDs along playlist names (not available for .pls playlists).', false, { func: isBoolean }, false],
-	optionUUID: ['UUID current method', '', { func: isStringWeak }, ''],
-	methodState: ['Current sorting method. Allowed: ', '', { func: isStringWeak }, ''], // Description and value filled on list.init() with defaults. Just a placeholder
-	sortState: ['Current sorting order. Allowed: ', '', { func: isStringWeak }, ''], // Description and value filled on list.init() with defaults. Just a placeholder
-	bSaveFilterStates: ['Save filtering between sessions', true, { func: isBoolean }, true],
-	filterStates: ['Current filters: ', '0,0'], // Description and value filled on list.init() with defaults. Just a placeholder
-	bShowSep: ['Show name/category separators: ', true, { func: isBoolean }, true],
-	listColors: ['List items color codes', '', { func: isStringWeak }, ''],
+	}), { func: isJSON }],
+	extension: ['Extension used when saving playlists', '.m3u8', { func: (val) => writablePlaylistFormats.has(val) }],
+	autoUpdate: ['Periodically checks playlist path (in ms). Forced > 200. 0 disables it.', 5000, { func: isInt, range: [[0, 0], [200, Infinity]] }], // Safety limit 0 or > 200
+	bShowSize: ['Show playlist size', false, { func: isBoolean }],
+	bUpdateAutoPlaylist: ['Update AutoPlaylist size by query output', true, { func: isBoolean }],
+	bUseUUID: ['Use UUIDs along playlist names (not available for .pls playlists).', false, { func: isBoolean }],
+	optionUUID: ['UUID current method', '', { func: isStringWeak }],
+	methodState: ['Current sorting method. Allowed: ', '', { func: isStringWeak }], // Description and value filled on list.init() with defaults. Just a placeholder
+	sortState: ['Current sorting order. Allowed: ', '', { func: isStringWeak }], // Description and value filled on list.init() with defaults. Just a placeholder
+	bSaveFilterStates: ['Save filtering between sessions', true, { func: isBoolean }],
+	filterStates: ['Current filters: ', '0,0', { func: isString }], // Description and value filled on list.init() with defaults. Just a placeholder
+	bShowSep: ['Show name/category separators: ', true, { func: isBoolean }],
+	listColors: ['List items color codes', '', { func: isStringWeak }],
 	infoPopups: ['Info popups fired once', JSON.stringify({
 		firstInit: false,
 		fplFormat: false,
@@ -144,11 +146,17 @@ let properties = {
 		noLibTracked: false,
 		subsongItem: false,
 		networkDrive: false,
-	})],
-	bRelativePath: ['Use relative paths for all new playlists', false, { func: isBoolean }, false],
-	_placeholder0_: ['', false, { func: isBoolean }, false],
-	_placeholder1_: ['', false, { func: isBoolean }, false],
-	categoryState: ['Current categories showed.', '[]'], // Description and value filled on list.init() with defaults. Just a placeholder
+		plsMirror: false,
+		autoTags: false
+	}), { func: isJSON }],
+	bRelativePath: ['Use relative paths for all new playlists', false, { func: isBoolean }],
+	scrollSettings: ['Scroll settings', JSON.stringify({
+		bSmooth: true,
+		bReversed: false,
+		unit: null
+	}), { func: isJSON }],
+	bOnNotifyColors: ['Adjust colors on panel notify', true, { func: isBoolean }],
+	categoryState: ['Current categories showed.', JSON.stringify([]), { func: isJSON }], // Description and value filled on list.init() with defaults. Just a placeholder
 	tooltipSettings: ['Tooltip settings', JSON.stringify({
 		bShowTips: true,
 		show: {
@@ -162,93 +170,92 @@ let properties = {
 			tags: true,
 			trackSize: true,
 		}
-	})],
-	bAutoLoadTag: ['Automatically add \'bAutoLoad\' to all playlists', false, { func: isBoolean }, false],
-	bAutoLockTag: ['Automatically add \'bAutoLock\' to all playlists', false, { func: isBoolean }, false],
-	bAutoCustomTag: ['Automatically add custom tags to all playlists', false, { func: isBoolean }, false],
-	autoCustomTag: ['Custom tags to add', '', { func: isStringWeak }, ''],
-	bApplyAutoTags: ['Apply actions based on tags (lock, load)', false, { func: isBoolean }, false],
-	bAutoTrackTag: ['Enable auto-tagging for added tracks (at autosave)', false, { func: isBoolean }, false],
-	bAutoTrackTagAlways: ['Enable auto-tagging for added tracks (always)', false, { func: isBoolean }, false],
-	bAutoTrackTagPls: ['Auto-tagging for standard playlists', false, { func: isBoolean }, false],
-	bAutoTrackTagLockPls: ['Auto-tagging for locked playlists', false, { func: isBoolean }, false],
-	bAutoTrackTagAutoPls: ['Auto-tagging for AutoPlaylists', false, { func: isBoolean }, false],
-	bAutoTrackTagAutoPlsInit: ['Auto-tagging for AutoPlaylists at startup', false, { func: isBoolean }, false],
+	}), { func: isJSON }],
+	bAutoLoadTag: ['Automatically add \'bAutoLoad\' to all playlists', false, { func: isBoolean }],
+	bAutoLockTag: ['Automatically add \'bAutoLock\' to all playlists', false, { func: isBoolean }],
+	bAutoCustomTag: ['Automatically add custom tags to all playlists', false, { func: isBoolean }],
+	autoCustomTag: ['Custom tags to add', '', { func: isStringWeak }],
+	bApplyAutoTags: ['Apply actions based on tags (lock, load)', false, { func: isBoolean }],
+	bAutoTrackTag: ['Enable auto-tagging for added tracks (at autosave)', false, { func: isBoolean }],
+	bAutoTrackTagAlways: ['Enable auto-tagging for added tracks (always)', false, { func: isBoolean }],
+	bAutoTrackTagPls: ['Auto-tagging for standard playlists', false, { func: isBoolean }],
+	bAutoTrackTagLockPls: ['Auto-tagging for locked playlists', false, { func: isBoolean }],
+	bAutoTrackTagAutoPls: ['Auto-tagging for AutoPlaylists', false, { func: isBoolean }],
+	bAutoTrackTagAutoPlsInit: ['Auto-tagging for AutoPlaylists at startup', false, { func: isBoolean }],
 	converterPreset: ['Converter Preset list', JSON.stringify([
 		{ name: '', dsp: '...', tf: '.\\%FILENAME%.mp3', path: '', playlistOutPath: '', extension: '' }, // Export all at same folder
 		{ name: '', dsp: '...', tf: '.\\' + _t(globTags.artist) + '\\%ALBUM%\\%TRACK% - %TITLE%.mp3', path: '', playlistOutPath: '', extension: '' }, // Transfer library
-		{ name: '--Kodi Librelec (<your_disk_name>)--', dsp: '...', tf: '/media/<your_disk_name>/music/$puts(art,$ascii($if2($meta(' + globTags.artistRaw + ',0),$meta(ARTIST,0))))$ifequal($strrchr($get(art),.),$len($get(art)),$puts(art,$cut($get(art),$sub($len($get(art)),1))),)$puts(alb,$ascii(%album%))$ifequal($strrchr($get(alb),.),$len($get(alb)),$puts(alb,$cut($get(alb),$sub($len($get(alb)),1))),)$replace($get(art),:,-,/,-,?,)/$replace($get(alb),:,-,/,-,?,)/$replace($ascii(%TRACK% - %TITLE%),:,-,/,-,?,).lossy.flac', path: '', playlistOutPath: '', extension: '.m3u', bExtendedM3U: true }, // Kodi-like library
+		{ name: '--Kodi LibrELEC (<your_disk_name>)--', dsp: '...', tf: '/media/<your_disk_name>/music/$puts(art,$ascii($if2($meta(' + globTags.artistRaw + ',0),$meta(ARTIST,0))))$ifequal($strrchr($get(art),.),$len($get(art)),$puts(art,$cut($get(art),$sub($len($get(art)),1))),)$puts(alb,$ascii(%album%))$ifequal($strrchr($get(alb),.),$len($get(alb)),$puts(alb,$cut($get(alb),$sub($len($get(alb)),1))),)$replace($get(art),:,-,/,-,?,)/$replace($get(alb),:,-,/,-,?,)/$replace($ascii(%TRACK% - %TITLE%),:,-,/,-,?,).lossy.flac', path: '', playlistOutPath: '', extension: '.m3u', bExtendedM3U: true }, // Kodi-like library
 		{ name: '--Kodi Windows (<your_disk_name>)--', dsp: '...', tf: '<your_disk_name>:\\music\\$ascii($if2($meta(' + globTags.artistRaw + ',0),$meta(ARTIST,0))\\%album%\\%TRACK% - %TITLE%).mp3', path: '', playlistOutPath: '', extension: '.m3u', bExtendedM3U: true }, // Kodi-like library
 		{ name: '--Foobar2000 mobile (playlists folder)--', dsp: '...', tf: '..\\music\\$ascii($if2($meta(' + globTags.artistRaw + ',0),$meta(ARTIST,0))\\%ALBUM%\\%TRACK% - %TITLE%).mp3', path: '', playlistOutPath: '', extension: '.m3u8', bExtendedM3U: true }, // Foobar2000 mobile, playlists on different folder than music
 		{ name: '--Foobar2000 mobile (root)--', dsp: '...', tf: '.\\music\\$ascii($if2($meta(' + globTags.artistRaw + ',0),$meta(ARTIST,0))\\%ALBUM%\\%TRACK% - %TITLE%).mp3', path: '', playlistOutPath: '', extension: '.m3u8', bExtendedM3U: true }, // Foobar2000 mobile, playlists on same root than music (without a folder)
 		{ name: '--Foobar2000 mobile (same folder)--', dsp: '...', tf: '.\\$ascii($if2($meta(' + globTags.artistRaw + ',0),$meta(ARTIST,0))\\%ALBUM%\\%TRACK% - %TITLE%).mp3', path: '', playlistOutPath: '', extension: '.m3u8', bExtendedM3U: true }, // Foobar2000 mobile, playlists on same folder than music
-		{ name: '--FiiO (playlists folder)--', dsp: '...', tf: '\\storage\\external_sd1\\' + globTags.artistAlbumTrackTitleSanitize + '.mp3', path: '', playlistOutPath: '#EXPORT##PLAYLIST#.playlist#EXT#', extension: '.m3u8', bExtendedM3U: false } // FiiO music
-	])],
-	bForbidDuplicates: ['Skip duplicates when adding to playlists', true, { func: isBoolean }, true],
-	bDeadCheckAutoSave: ['Warn about dead items on auto-save', false, { func: isBoolean }, false],
-	bBOM: ['Save files as UTF8 with BOM?', false, { func: isBoolean }, false],
-	removeDuplicatesAutoPls: ['AutoPlaylists, Remove duplicates by', JSON.stringify(globTags.remDupl), { func: isJSON }, JSON.stringify(globTags.remDupl)],
-	bRemoveDuplicatesAutoPls: ['AutoPlaylists, filtering enabled', true, { func: isBoolean }, true],
-	bShowMenuHeader: ['Show header on playlist menus?', true, { func: isBoolean }, true],
-	bCopyAsync: ['Copy tracks asynchronously on export?', true, { func: isBoolean }, true],
-	bRemoveDuplicatesSmartPls: ['Smart Playlists, filtering enabled', true, { func: isBoolean }, true],
-	bSavingWarnings: ['Warnings when saving to another format', true, { func: isBoolean }, true],
-	bQuickSearchName: ['Quick-search forced by name', true, { func: isBoolean }, true],
-	_placeholder3_: ['', false, { func: isBoolean }, false],
-	bCheckDuplWarnings: ['Warnings when loading duplicated playlists', true, { func: isBoolean }, true],
-	bSavingXsp: ['Auto-save .xsp playlists?', false, { func: isBoolean }, false],
-	bAllPls: ['Track UI-only playlists?', false, { func: isBoolean }, false],
-	autoBack: ['Auto-backup interval for playlists (in ms). Forced > 1000. 0 disables it.', Infinity, { func: !isNaN, range: [[0, 0], [1000, Infinity]] }, Infinity], // Infinity calls it on unload and playlist changes only
-	autoBackN: ['Auto-backup files allowed.', 50, { func: isInt }, 50],
-	filterMethod: ['Current filter buttons', 'Playlist type,Lock state', { func: isString }, 'Playlist type,Lock state'],
-	bSavingDefExtension: ['Try to save playlists always as default format?', true, { func: isBoolean }, true],
-	_placeholder4_: ['', false, { func: isBoolean }, false],
-	bOpenOnExport: ['Open folder on export actions?', true, { func: isBoolean }, true],
-	bShowIcons: ['Show playlist icons?', true, { func: isBoolean }, true],
+		{ name: '--FiiO (playlists folder)--', dsp: '...', tf: '\\storage\\external_sd1\\' + globTags.artistAlbumTrackTitlePath + '.mp3', path: '', playlistOutPath: '#EXPORT##PLAYLIST#.playlist#EXT#', extension: '.m3u8', bExtendedM3U: false } // FiiO music
+	]), { func: isJSON }],
+	bForbidDuplicates: ['Skip duplicates when adding to playlists', true, { func: isBoolean }],
+	bDeadCheckAutoSave: ['Warn about dead items on auto-save', false, { func: isBoolean }],
+	bBOM: ['Save files as UTF8 with BOM', false, { func: isBoolean }],
+	removeDuplicatesAutoPls: ['AutoPlaylists, Remove duplicates by', JSON.stringify(globTags.remDupl), { func: isJSON }],
+	bRemoveDuplicatesAutoPls: ['AutoPlaylists, filtering enabled', true, { func: isBoolean }],
+	bShowMenuHeader: ['Show header on playlist menus', true, { func: isBoolean }],
+	bCopyAsync: ['Copy tracks asynchronously on export', true, { func: isBoolean }],
+	bRemoveDuplicatesSmartPls: ['Smart Playlists, filtering enabled', true, { func: isBoolean }],
+	bSavingWarnings: ['Warnings when saving to another format', true, { func: isBoolean }],
+	bQuickSearchName: ['Quick-search forced by name', true, { func: isBoolean }],
+	deletePlsStartup: ['Delete playlists on startup', JSON.stringify([]), { func: isJSON }],
+	bCheckDuplWarnings: ['Warnings when loading duplicated playlists', true, { func: isBoolean }],
+	bSavingXsp: ['Auto-save .xsp playlists', false, { func: isBoolean }],
+	bAllPls: ['Track UI-only playlists', false, { func: isBoolean }],
+	autoBack: ['Auto-backup interval for playlists (in ms). Forced > 1000. 0 disables it.', Infinity, { func: !isNaN, range: [[0, 0], [1000, Infinity]] }], // Infinity calls it on unload and playlist changes only
+	autoBackN: ['Auto-backup files allowed.', 50, { func: isInt }],
+	filterMethod: ['Current filter buttons', 'Playlist type,Lock state', { func: isString }],
+	bSavingDefExtension: ['Try to save playlists always as default format', true, { func: isBoolean }],
+	deletePlsStartupFiles: ['Delete playlists files on startup', false, { func: isBoolean }],
+	bOpenOnExport: ['Open folder on export actions', true, { func: isBoolean }],
+	bShowIcons: ['Show playlist icons', true, { func: isBoolean }],
 	playlistIcons: ['Playlist icons codes (Font Awesome)', JSON.stringify(
 		Object.fromEntries(Object.entries(playlistDescriptors).map((plsPair) => {
 			const key = plsPair[0];
 			const icon = plsPair[1].icon ? plsPair[1].icon.charCodeAt(0).toString(16) : null;
 			const iconBg = plsPair[1].iconBg ? plsPair[1].iconBg.charCodeAt(0).toString(16) : null;
 			return [key, { icon, iconBg }];
-		})))
-	],
-	bDynamicMenus: ['Show dynamic menus?', true, { func: isBoolean }, true],
+		}))), { func: isJSON }],
+	iDynamicMenus: ['Show dynamic menus', 1, { func: isInt, range: [[0, 2]] }],
 	lShortcuts: ['L. click modifiers', JSON.stringify({
 		Ctrl: 'Copy selection to playlist',
 		Shift: 'Load / show playlist',
 		'Ctrl + Shift': 'Clone playlist in UI',
 		'Single Click': '- None -',
 		'Double Click': 'Load / show playlist'
-	})],
+	}), { func: isJSON }],
 	mShortcuts: ['M. click modifiers', JSON.stringify({
 		Ctrl: '- None -',
 		Shift: 'Multiple selection (range)',
 		'Ctrl + Shift': '- None -',
 		'Single Click': 'Multiple selection'
-	})],
-	bMultMenuTag: ['Automatically add \'bMultMenu\' to all playlists', false],
-	lBrainzToken: ['ListenBrainz user token', '', { func: isStringWeak }, ''],
-	lBrainzEncrypt: ['Encript ListenBrainz user token?', false, { func: isBoolean }, false],
-	bLookupMBIDs: ['Lookup for missing track MBIDs?', true, { func: isBoolean }, true],
-	bAdvTitle: ['AutoPlaylists, duplicates RegExp title matching', true, { func: isBoolean }, true],
-	activePlsStartup: ['Active playlist on startup', '', { func: isStringWeak }, ''],
-	bBlockUpdateAutoPls: ['Block panel while updating AutoPlaylists', false, { func: isBoolean }, false],
-	bQuickSearchNext: ['Quick-search jump to next item when letter is pressed twice', true, { func: isBoolean }, true],
-	bQuickSearchCycle: ['Quick-search cycling when no more items found', true, { func: isBoolean }, true],
+	}), { func: isJSON }],
+	bMultMenuTag: ['Automatically add \'bMultMenu\' to all playlists', false, { func: isBoolean }],
+	lBrainzToken: ['ListenBrainz user token', '', { func: isStringWeak }],
+	lBrainzEncrypt: ['Encrypt ListenBrainz user token', false, { func: isBoolean }],
+	bLookupMBIDs: ['Lookup for missing track MBIDs', true, { func: isBoolean }],
+	bAdvTitle: ['AutoPlaylists, duplicates RegExp title matching', true, { func: isBoolean }],
+	activePlsStartup: ['Active playlist on startup', '', { func: isStringWeak }],
+	bBlockUpdateAutoPls: ['Block panel while updating AutoPlaylists', false, { func: isBoolean }],
+	bQuickSearchNext: ['Quick-search jump to next item when letter is pressed twice', true, { func: isBoolean }],
+	bQuickSearchCycle: ['Quick-search cycling when no more items found', true, { func: isBoolean }],
 	mShortcutsHeader: ['M. click (header) modifiers', JSON.stringify({
 		Ctrl: '- None -',
 		Shift: '- None -',
 		'Ctrl + Shift': '- None -',
 		'Single Click': 'Multiple selection (all)'
-	})],
+	}), { func: isJSON }],
 	lShortcutsHeader: ['L. click (header) modifiers', JSON.stringify({
 		Ctrl: '- None -',
 		Shift: '- None -',
 		'Ctrl + Shift': '- None -',
 		'Single Click': 'Show current / playing playlist',
 		'Double Click': 'Cycle categories'
-	})],
+	}), { func: isJSON }],
 	showMenus: ['Show menus configuration', JSON.stringify({
 		'Playlist\'s items menu': false,
 		'Category': true,
@@ -264,7 +271,7 @@ let properties = {
 		'Folders': true,
 		'Statistics mode': true,
 		'Queue handling': true
-	})],
+	}), { func: isJSON }],
 	searchMethod: ['Search settings', JSON.stringify({
 		bName: true,
 		bTags: true,
@@ -282,8 +289,9 @@ let properties = {
 		bQuery: true,
 		bMetaQuery: true,
 		dragDropPriority: ['bPath', 'bQuery', 'bMetaTracks'],
+		dragDropTags: [globTags.title, globTags.artistRaw],
 		text: '',
-	})],
+	}), { func: isJSON }],
 	uiElements: ['UI elements', JSON.stringify({
 		'Scrollbar': { enabled: true },
 		'Search filter': { enabled: true },
@@ -302,18 +310,18 @@ let properties = {
 				'Help': { enabled: true, position: 6 },
 			}
 		}
-	})],
-	bSetup: ['Setup mode', true, { func: isBoolean }, true],
-	iDoubleClickTimer: ['Double click timer', 375, { func: isInt }, 375],
+	}), { func: isJSON }],
+	bSetup: ['Setup mode', true, { func: isBoolean }],
+	iDoubleClickTimer: ['Double click timer', 375, { func: isInt }],
 	rShortcuts: ['R. click modifiers', JSON.stringify({
 		Ctrl: '- None -',
 		Shift: 'Playlist\'s items menu',
 		'Ctrl + Shift': '- None -',
 		'Single Click': 'Manage playlist'
-	})],
-	bSpotify: ['ListenBrainz export to Spotify', true, { func: isBoolean }, true],
-	iTooltipTimer: ['Tooltip timer', 375 * 2, { func: isInt }, 375 * 2],
-	bGlobalShortcuts: ['Enable FX global shortcuts', true, { func: isBoolean }, true],
+	}), { func: isJSON }],
+	bSpotify: ['ListenBrainz export to Spotify', true, { func: isBoolean }],
+	iTooltipTimer: ['Tooltip timer', 375 * 2, { func: isInt }],
+	bGlobalShortcuts: ['Enable FX global shortcuts', true, { func: isBoolean }],
 	columns: ['Columns options', JSON.stringify({
 		labels: ['size', 'duration'],
 		width: ['auto', 'auto'],
@@ -324,17 +332,17 @@ let properties = {
 		line: 'none',
 		autoWidth: 'entire list',
 		sizeUnits: { prefix: '', suffix: ' \u266A' } // Musical note
-	})],
-	bSkipMenuTag: ['Automatically add \'bSkipMenuTag\' to all playlists', false, { func: isBoolean }, false],
-	bLiteMode: ['Lite mode enabled? (foo_plorg replacement)', false, { func: isBoolean }, false],
-	bAutoSelTitle: ['Playlist\'s name from selection using ARTIST[ - ALBUM]', false, { func: isBoolean }, false],
+	}), { func: isJSON }],
+	bSkipMenuTag: ['Automatically add \'bSkipMenuTag\' to all playlists', false, { func: isBoolean }],
+	bLiteMode: ['Lite mode enabled? (foo_plorg replacement)', false, { func: isBoolean }],
+	bAutoSelTitle: ['Playlist\'s name from selection using ARTIST[ - ALBUM]', false, { func: isBoolean }],
 	folders: ['Folders options', JSON.stringify({
 		maxDepth: 3,
 		bShowSize: true,
 		bShowSizeDeep: true,
 		icons: { open: chars.downOutline, closed: chars.leftOutline }
-	})],
-	bStatsMode: ['Stats mode enabled?', false, { func: isBoolean }, false],
+	}), { func: isJSON }],
+	bStatsMode: ['Stats mode enabled', false, { func: isBoolean }],
 	statsConfig: ['Stats mode configuration', JSON.stringify({
 		// graph: {/* type, borderWidth, point */},
 		// dataManipulation = {/* sort, filter, slice, distribution , probabilityPlot*/},
@@ -342,66 +350,45 @@ let properties = {
 		margin: { left: _scale(20), right: _scale(20), top: _scale(10), bottom: _scale(15) },
 		// grid = {x: {/* show, color, width */}, y: {/* ... */}},
 		// axis = {x: {/* show, color, width, ticks, labels, key, bSingleLabels */}, y: {/* ... */}}
-	})],
-	bAutoUpdateCheck: ['Automatically check updates?', globSettings.bAutoUpdateCheck, { func: isBoolean }, globSettings.bAutoUpdateCheck],
-	panelUUID: ['Panel UUID', UUID(), { func: isUUID }, UUID()],
-	bAutoRefreshXsp: ['Automatically refresh XSP playlists sources', true, { func: isBoolean }, true],
-	deleteBehavior: ['Playlist file delete behavior', 0, { func: (n) => n >= 0 && n <= 2 }, 0],
+	}), { func: isJSON }],
+	bAutoUpdateCheck: ['Automatically check updates', globSettings.bAutoUpdateCheck, { func: isBoolean }],
+	panelUUID: ['Panel UUID', UUID(), { func: isUUID }],
+	bAutoRefreshXsp: ['Automatically refresh XSP playlists sources', true, { func: isBoolean }],
+	deleteBehavior: ['Playlist file delete behavior', 0, { func: (n) => n >= 0 && n <= 2 }],
 	delays: ['Panel loading delays', JSON.stringify({
 		playlistLoading: 5000,
 		startupPlaylist: 2000,
 		dynamicMenus: 2500,
 		playlistCache: 6000,
-	})],
+	}), { func: isJSON }],
 	statusIcons: ['Playlist status icons', JSON.stringify({
 		active: { enabled: true, string: String.fromCharCode(8226) /* • */, offset: true },
 		playing: { enabled: true, string: String.fromCharCode(9654) /* ▶ */, offset: false },
 		loaded: { enabled: true, string: String.fromCharCode(187) /* » */, offset: true }
-	})],
-	bForceCachePls: ['Force playlist cache at init', false, { func: isBoolean }, false],
-	importPlaylistFilters: ['Import file \\ url filters', JSON.stringify([globQuery.stereo, globQuery.notLowRating, globQuery.noLive, globQuery.noLiveNone])],
-	importPlaylistMask: ['Import file \\ url pattern', JSON.stringify(['. ', '%TITLE%', ' - ', globTags.artist])],
-	bMultiple: ['Partial multi-value tag matching', true, { func: isBoolean }, true],
+	}), { func: isJSON }],
+	bForceCachePls: ['Force playlist cache at init', false, { func: isBoolean }],
+	importPlaylistFilters: ['Import file \\ url filters', JSON.stringify([globQuery.stereo, globQuery.notLowRating, globQuery.noLive, globQuery.noLiveNone]), { func: (x) => isJSON(x) && JSON.parse(x).every((query) => checkQuery(query, true)) }],
+	importPlaylistMask: ['Import file \\ url pattern', JSON.stringify(['. ', '%TITLE%', ' - ', globTags.artist]), { func: isJSON }],
+	bMultiple: ['Partial multi-value tag matching', true, { func: isBoolean }],
 	folderRules: ['Send new playlists to folders', JSON.stringify({
 		externalUi: '',
 		internalUi: '',
 		plsFromSel: '',
 		others: ''
-	})],
-	bRwLock: ['Not overwrite playlists loading new files', false, { func: isBoolean }, false],
+	}), { func: isJSON }],
+	bRwLock: ['Not overwrite playlists loading new files', false, { func: isBoolean }],
 	logOpt: ['Logging options', JSON.stringify({
 		autoSize: false,
 		loadPls: false,
 		profile: false,
-	})],
+		mainMenu: false
+	}), { func: isJSON }],
 	xspfRules: ['XSPF playlists behavior', JSON.stringify({
 		bFallbackComponentXSPF: false,
 		bLoadNotTrackedItems: false,
-	})],
+	}), { func: isJSON }],
 };
-properties['converterPreset'].push({ func: isJSON }, properties['converterPreset'][1]);
-properties['playlistIcons'].push({ func: isJSON }, properties['playlistIcons'][1]);
-properties['mShortcuts'].push({ func: isJSON }, properties['mShortcuts'][1]);
-properties['lShortcuts'].push({ func: isJSON }, properties['lShortcuts'][1]);
-properties['tooltipSettings'].push({ func: isJSON }, properties['tooltipSettings'][1]);
-properties['rShortcuts'].push({ func: isJSON }, properties['rShortcuts'][1]);
-properties['lShortcutsHeader'].push({ func: isJSON }, properties['lShortcutsHeader'][1]);
-properties['mShortcutsHeader'].push({ func: isJSON }, properties['mShortcutsHeader'][1]);
-properties['showMenus'].push({ func: isJSON }, properties['showMenus'][1]);
-properties['searchMethod'].push({ func: isJSON }, properties['searchMethod'][1]);
-properties['uiElements'].push({ func: isJSON }, properties['uiElements'][1]);
-properties['columns'].push({ func: isJSON }, properties['columns'][1]);
-properties['folders'].push({ func: isJSON }, properties['folders'][1]);
-properties['statsConfig'].push({ func: isJSON }, properties['statsConfig'][1]);
-properties['delays'].push({ func: isJSON }, properties['delays'][1]);
-properties['statusIcons'].push({ func: isJSON }, properties['statusIcons'][1]);
-properties['importPlaylistFilters'].push({ func: (x) => isJSON(x) && JSON.parse(x).every((query) => checkQuery(query, true)) }, properties['importPlaylistFilters'][1]);
-properties['importPlaylistMask'].push({ func: isJSON }, properties['importPlaylistMask'][1]);
-properties['folderRules'].push({ func: isJSON }, properties['folderRules'][1]);
-properties['logOpt'].push({ func: isJSON }, properties['logOpt'][1]);
-properties['xspfRules'].push({ func: isJSON }, properties['xspfRules'][1]);
-properties['infoPopups'].push({ func: isJSON }, properties['infoPopups'][1]);
-properties['fplRules'].push({ func: isJSON }, properties['fplRules'][1]);
+Object.keys(properties).forEach(p => properties[p].push(properties[p][1]));
 setProperties(properties, 'plm_');
 {	// Check if is a setup or normal init
 	let prop = getPropertiesPairs(properties, 'plm_');
@@ -483,11 +470,11 @@ setProperties(properties, 'plm_');
 			const newFile = folders.data + 'playlistManager_' + prop.panelUUID[1];
 			const suffix = ['.json', '_sorting.json', '_config.json', '.json.old', '_sorting.json.old', '_config.json.old'];
 			if (suffix.every((s) => { return !_isFile(file + s) || _copyFile(file + s, newFile + s); })) {
-				console.log(window.Name + ': creating UUID file from existing JSON ' + _p(file + '.json')); // DEBUG
+				console.log(window.Name + ' (Playlist-Manager-SMP): creating UUID file from existing JSON ' + _p(file + '.json')); // DEBUG
 				suffix.forEach((s) => _recycleFile(file + s, true));
 			} else {
 				suffix.forEach((s) => _recycleFile(newFile + s, true));
-				console.popup(window.Name + ': error creating UUID file from existing JSON\n\n' + file, window.Name);
+				console.popup(window.Name + _ps(window.ScriptInfo.Name) + ': error creating UUID file from existing JSON\n\n' + file, window.Name + _ps(window.ScriptInfo.Name));
 			}
 		}
 	}
@@ -519,7 +506,7 @@ let plsRwLock;
 		pop.enable(true, 'Setup', 'Setup required.\nPanel will be disabled during the process.');
 	} else if (!infoPopups.firstInit) {
 		if (folders.JsPackageDirs) { // Workaround for https://github.com/TheQwertiest/foo_spider_monkey_panel/issues/210
-			WshShell.Popup('This script has been installed as a package.\nBefore closing the \'Spider Monkey Panel\\JSplitter configuration window\' all popups must be closed, take your time reading them and following their instructions.\nAfterwards, close the window. Panel will be reloaded.', 0, window.Name, popup.info + popup.ok);
+			WshShell.Popup('This script has been installed as a package.\nBefore closing the \'Spider Monkey Panel\\JSplitter configuration window\' all popups must be closed, take your time reading them and following their instructions.\nAfterwards, close the window. Panel will be reloaded.', 0, window.Name + _ps(window.ScriptInfo.Name), popup.info + popup.ok);
 			if (getPropertiesValues(properties, 'plm_').filter(Boolean).length === 0) { // At this point nothing works properly so just throw
 				throw new Error('READ THE POPUPS AND STOP CLICKING ON BUTTONS WITHOUT READING!!!\nOtherwise TT, aka GeoRrGiA-ReBorN\'s master, will try\nto kill you with their good jokes.\n\nReally, read the popups and make our lives easier. Try reinstalling the script.\n\nThanks :)');
 			}
@@ -631,13 +618,13 @@ let plsRwLock;
 		}
 		// Create listener to check for same playlist path which usually requires a reminder to set another tracked folder
 		const callback = () => !pop.isEnabled() && list && list.bInit
-			? window.NotifyOthers('Playlist Manager: playlistPath', null)
+			? window.NotifyOthers(window.ScriptInfo.Name + ': playlistPath', null)
 			: setTimeout(callback, 3000);
 		setTimeout(callback, 6000);
 		const listener = addEventListener('on_notify_data', (name, info) => {
 			if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
 			switch (name) { // NOSONAR
-				case 'Playlist Manager: playlistPath': {
+				case window.ScriptInfo.Name + ': playlistPath': {
 					if (info) {
 						if (info === list.playlistsPath) {
 							fb.ShowPopupMessage('There is another Playlist Manager panel tracking the same folder (which is usually undesired), you may want to configure this panel to track a different playlist folder.\n\nIn case you want to track the same folder with multiple panels, read the \'Advanced Tips\' section at the PDF readme first. Don\'t forget to disable auto-saving and auto-backup on all but one of the panels if needed (to not process multiple times the same files).', 'Playlist Manager: found same tracked folder');
@@ -658,7 +645,7 @@ let plsRwLock;
 			list.resetFilter();
 			// Import AutoPlaylists
 			if (list.isAutoPlaylistMissing()) {
-				const answer = WshShell.Popup('Import native AutoPlaylists into the manager?\n\nClicking no will treat them as UI-only playlists and cloning or later importing (which can be done at any point) would be required to edit them.', 0, window.Name, popup.question + popup.yes_no);
+				const answer = WshShell.Popup('Import native AutoPlaylists into the manager?\n\nClicking no will treat them as UI-only playlists and cloning or later importing (which can be done at any point) would be required to edit them.', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no);
 				if (answer === popup.yes) {
 					try { fb.RunMainMenuCommand('Save configuration'); } catch (e) { console.log(e); }
 					list.importAutoPlaylistsFromFoobar({ bSelect: false });
@@ -680,7 +667,7 @@ globProfiler.Print('init');
 // List and other UI elements
 const list = new _list(LM, TM, 0, 0);
 const stats = new _listStatistics(LM, TM, 0, 0, list.properties.bStatsMode[1], JSON.parse(list.properties.statsConfig[1]));
-let scroll; // eslint-disable-line no-redeclare
+let scrollBar; // eslint-disable-line no-redeclare
 
 const autoSaveTimer = Number(list.properties.autoSave[1]);
 const autoUpdateTimer = Number(list.properties.autoUpdate[1]);
@@ -717,7 +704,7 @@ if (!list.properties.bSetup[1]) {
 	autoBackRepeat = (autoBackTimer && isInt(autoBackTimer)) ? repeatFn(backup, autoBackTimer)(list.properties.autoBackN[1]) : null;
 	const plsHistory = new PlsHistory();
 	// Scroll bar
-	scroll = list.uiElements['Scrollbar'].enabled ? new _scrollBar({ // eslint-disable-line no-global-assign
+	scrollBar = list.uiElements['Scrollbar'].enabled ? new _scrollBar({ // eslint-disable-line no-global-assign
 		w: _scale(5),
 		size: _scale(14),
 		bgColor: blendColors(panel.colors.highlight, panel.getColorBackground(), isDark(panel.getColorBackground()) ? 0.3 : 0.8),
@@ -728,8 +715,17 @@ if (!list.properties.bSetup[1]) {
 		dblclkFunc: (current) => { // eslint-disable-line no-unused-vars
 			list.showCurrPls() || list.showCurrPls({ bPlayingPls: true });
 		},
-		tt: 'Double L. click to Show active or now playling playlist'
+		tt: 'Double L. click to Show active or now playing playlist'
 	}) : null;
+
+	scrollBar.resize = function () {
+		this.x = window.Width - this.w;
+		this.y = list.getHeaderSize().h;
+		this.h = list.h - (this.y - list.y) - 1;
+		if (list.uiElements['Bottom toolbar'].enabled) { this.h -= bottomToolbar.h - _scale(1); }
+		this.rows = Math.max(list.items - list.rows, 0);
+		this.rowsPerPage = list.rows;
+	};
 
 	// Tracking a network drive?
 	if (!_hasRecycleBin(list.playlistsPath.match(/^(.+?:)/g)[0])) {
@@ -738,7 +734,7 @@ if (!list.properties.bSetup[1]) {
 			list.setInfoPopup('networkDrive');
 			const file = folders.xxx + 'helpers\\readme\\playlist_manager_network.txt';
 			const readme = _open(file, utf8);
-			fb.ShowPopupMessage(readme, window.Name);
+			fb.ShowPopupMessage(readme, window.Name + _ps(window.ScriptInfo.Name));
 		}
 	} else if (list.infoPopups.networkDrive) {
 		list.setInfoPopup('networkDrive', false);
@@ -760,7 +756,7 @@ if (!list.properties.bSetup[1]) {
 
 	addEventListener('on_colours_changed', () => {
 		panel.colorsChanged();
-		list.checkConfigPostUpdate(list.checkConfig({ bResetColors: true }));
+		if (list.checkConfig({ bResetColors: true })) { overwriteProperties(list.properties); }
 		list.repaint();
 	});
 
@@ -785,7 +781,7 @@ if (!list.properties.bSetup[1]) {
 		if (!list.bInit) { return; }
 		if (pop.isEnabled() || stats.bEnabled) { return; }
 		if (bottomToolbar.curBtn === null) {
-			if (scroll && scroll.btn_up(x, y)) { return; }
+			if (scrollBar && scrollBar.btn_up(x, y)) { return; }
 			list.lbtn_up(x, y, mask);
 		} else {
 			bottomToolbar.on_mouse_lbtn_up_buttn(x, y);
@@ -804,7 +800,7 @@ if (!list.properties.bSetup[1]) {
 		if (!list.bInit) { return; }
 		if (pop.isEnabled() || stats.bEnabled) { return; }
 		if (bottomToolbar.curBtn === null) {
-			if (scroll && scroll.btn_down(x, y)) { return; }
+			if (scrollBar && scrollBar.btn_down(x, y)) { return; }
 			list.lbtn_down(x, y, mask);
 		} else {
 			bottomToolbar.on_mouse_lbtn_down_buttn(x, y);
@@ -815,7 +811,7 @@ if (!list.properties.bSetup[1]) {
 		if (!list.bInit) { return; }
 		if (pop.isEnabled() || stats.bEnabled) { return; }
 		if (bottomToolbar.curBtn === null) {
-			if (scroll && scroll.lbtn_dblclk(x, y)) { return; }
+			if (scrollBar && scrollBar.lbtn_dblclk(x, y)) { return; }
 			list.lbtn_dblclk(x, y);
 		}
 	});
@@ -823,7 +819,7 @@ if (!list.properties.bSetup[1]) {
 	addEventListener('on_mouse_move', (x, y, mask, bDragDrop = false) => {
 		if (stats.bEnabled) { return; }
 		if (pop.isEnabled()) { pop.move(x, y, mask); window.SetCursor(IDC_WAIT); return; }
-		if (scroll && scroll.move(x, y)) { list.move(-1, -1); bottomToolbar.curBtn = null; return; }
+		if (scrollBar && scrollBar.move(x, y)) { list.move(-1, -1); bottomToolbar.curBtn = null; return; }
 		if (!list.isInternalDrop()) { bottomToolbar.on_mouse_move_buttn(x, y, mask); }
 		if (bottomToolbar.curBtn === null) {
 			list.move(x, y, mask, bDragDrop);
@@ -839,7 +835,7 @@ if (!list.properties.bSetup[1]) {
 		if (pop.isEnabled() || stats.bEnabled) { return; }
 		bottomToolbar.on_mouse_leave_buttn();
 		list.onMouseLeaveList(); // Clears index selector
-		scroll && scroll.move(-1, -1);
+		scrollBar && scrollBar.move(-1, -1);
 	});
 
 	addEventListener('on_mouse_rbtn_up', (x, y, mask) => {
@@ -856,7 +852,7 @@ if (!list.properties.bSetup[1]) {
 			}
 		} else {
 			if (bottomToolbar.curBtn === null) {
-				if (scroll && scroll.trace(x, y)) { return scroll.rbtn_up(x, y); }
+				if (scrollBar && scrollBar.trace(x, y)) { return scrollBar.rbtn_up(x, y); }
 				else { return list.rbtn_up(x, y, mask); }
 			}
 			if (bottomToolbar.curBtn === bottomToolbar.buttons.sortButton) { // Sort button menu
@@ -873,11 +869,14 @@ if (!list.properties.bSetup[1]) {
 	addEventListener('on_mouse_wheel', (s) => {
 		if (!list.bInit) { return; }
 		if (pop.isEnabled() || stats.bEnabled) { return; }
-		list.wheel({ s });
+		if (list.scrollSettings.bReversed) { s = -s; }
+		if (utils.IsKeyPressed(VK_CONTROL) && utils.IsKeyPressed(VK_ALT)) {	list.wheelResize(s); }
+		else { list.wheel({ s }); }
 	});
 
 	addEventListener('on_paint', (gr) => {
-		if (globSettings.bDebugPaint) { extendGR(gr, { Repaint: true }); }
+		if (globSettings.bDebugPaint) { extendGR(gr, { DrawRoundRect: true, FillRoundRect: true, Repaint: true }); }
+		else { extendGR(gr, { DrawRoundRect: true, FillRoundRect: true }); }
 		list.prePaint();
 		panel.paint(gr);
 		if (!stats.bEnabled) {
@@ -892,13 +891,13 @@ if (!list.properties.bSetup[1]) {
 				if (list.uiElements['Bottom toolbar'].enabled) { bottomToolbar.on_paint_buttn(gr); }
 			}
 			list.paint(gr);
-			if (list.bPaintList && scroll) {
-				scroll.rows = Math.max(list.items - list.rows, 0);
-				scroll.rowsPerPage = list.rows;
-				scroll.currRow = list.offset;
-				if (scroll.rows >= 1) {
-					scroll.size = Math.max(Math.round(scroll.h / (scroll.rows === 1 ? 2 : scroll.rows)), _scale(14));
-					scroll.paint(gr);
+			if (list.bPaintList && scrollBar) {
+				scrollBar.rows = Math.max(list.items - list.rows, 0);
+				scrollBar.rowsPerPage = list.rows;
+				scrollBar.currRow = list.offset;
+				if (scrollBar.rows >= 1) {
+					scrollBar.size = Math.max(Math.round(scrollBar.h / (scrollBar.rows === 1 ? 2 : scrollBar.rows)), _scale(14));
+					scrollBar.paint(gr);
 				}
 			}
 		}
@@ -911,15 +910,8 @@ if (!list.properties.bSetup[1]) {
 		panel.size();
 		list.size();
 		bottomToolbar.on_size_buttn();
+		scrollBar.resize();
 		pop.resize();
-		if (scroll) {
-			scroll.x = window.Width - scroll.w;
-			scroll.y = list.getHeaderSize().h;
-			scroll.h = list.h - (scroll.y - list.y) - 1;
-			if (list.uiElements['Bottom toolbar'].enabled) { scroll.h -= bottomToolbar.h - _scale(1); }
-			scroll.rows = Math.max(list.items - list.rows, 0);
-			scroll.rowsPerPage = list.rows;
-		}
 	});
 
 	addEventListener('on_playback_new_track', () => { // To show playing now playlist indicator...
@@ -962,24 +954,30 @@ if (!list.properties.bSetup[1]) {
 	addEventListener('on_notify_data', (name, info) => {
 		if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
 		switch (name) {
-			case 'Playlist Manager: playlistPath': {
-				if (!info) { window.NotifyOthers('Playlist Manager: playlistPath', list.playlistsPath); } // Share paths
+			// Internal use
+			case 'xxx-scripts: scrollbar hidden': {
+				window.RepaintRect(list.x + list.w - list.categoryHeaderOffset, list.y, list.x + list.w, list.y + list.h);
 				break;
 			}
-			case 'Playlist Manager: get handleList': {
+			// External use
+			case window.ScriptInfo.Name + ': playlistPath': {
+				if (!info) { window.NotifyOthers(window.ScriptInfo.Name + ': playlistPath', list.playlistsPath); } // Share paths
+				break;
+			}
+			case window.ScriptInfo.Name + ': get handleList': {
 				if (info && info.length) {
 					const plsName = info;
 					if (list.hasPlaylists([plsName])) {
-						window.NotifyOthers('Playlist Manager: handleList', Promise.resolve(list.getHandleFromPlaylists([plsName], false)));
+						window.NotifyOthers(window.ScriptInfo.Name + ': handleList', Promise.resolve(list.getHandleFromPlaylists([plsName], false)));
 					}
 				} // Share paths
 				break;
 			}
-			case 'Playlist Manager: switch tracking': {
+			case window.ScriptInfo.Name + ': switch tracking': {
 				list.switchTracking(info);
 				break;
 			}
-			case 'Playlist Manager: change startup playlist': {
+			case window.ScriptInfo.Name + ': change startup playlist': {
 				if (list.activePlsStartup !== info) {
 					list.activePlsStartup = info;
 					list.properties.activePlsStartup[1] = list.activePlsStartup;
@@ -987,13 +985,13 @@ if (!list.properties.bSetup[1]) {
 				}
 				break;
 			}
-			case 'Playlist Manager: addToSkipRwLock': {
+			case window.ScriptInfo.Name + ': addToSkipRwLock': {
 				if (info && (Object.hasOwn(info, 'uiIdx') || Object.hasOwn(info, 'name'))) {
 					list.addToSkipRwLock({ uiIdx: info.uiIdx, name: info.name });
 				}
 				break;
 			}
-			case 'precacheLibraryPaths': {
+			case 'xxx-scripts: precacheLibraryPaths': {
 				if (list.bLiteMode) { return; }
 				if (!info) {
 					cacheLib(void (0), void (0), void (0), true);
@@ -1002,7 +1000,7 @@ if (!list.properties.bSetup[1]) {
 					if (now - plmInit.lastUpdate > 1000) { plmInit.lastUpdate = now; } else { plmInit.lastUpdate = now; return; } // Update once per time needed...
 					libItemsAbsPaths = [...info];
 					if (plmInit.interval) { clearInterval(plmInit.interval); plmInit.interval = null; }
-					console.log('precacheLibraryPaths: using paths from another instance.', window.Name);
+					console.log('precacheLibraryPaths: using paths from another instance.', window.Name + _ps(window.ScriptInfo.Name));
 					// Update rel paths if needed with new data
 					if (list.bRelativePath && list.playlistsPath.length) {
 						if (Object.hasOwn(libItemsRelPaths, list.playlistsPath) && libItemsRelPaths[list.playlistsPath].length !== libItemsAbsPaths.length) {
@@ -1019,12 +1017,12 @@ if (!list.properties.bSetup[1]) {
 				}
 				break;
 			}
-			case 'precacheLibraryPaths ask': {
+			case 'xxx-scripts: precacheLibraryPaths ask': {
 				if (list.bLiteMode || pop.isEnabled('cacheLib') || pop.isEnabled('cacheLib waiting')) { return; }
 				if (list.bLibraryChanged) {
-					window.NotifyOthers('precacheLibraryPaths', null);
+					window.NotifyOthers('xxx-scripts: precacheLibraryPaths', null);
 				} else if (libItemsAbsPaths && libItemsAbsPaths.length) {
-					window.NotifyOthers('precacheLibraryPaths', [...libItemsAbsPaths]);
+					window.NotifyOthers('xxx-scripts: precacheLibraryPaths', [...libItemsAbsPaths]);
 				}
 				break;
 			}
@@ -1036,7 +1034,7 @@ if (!list.properties.bSetup[1]) {
 			}
 			case 'xxx-scripts: lb token reply': {
 				if (callbacksListener.lBrainzTokenListener) {
-					console.log('lb token reply: using token from another instance.', window.Name, _p('from ' + info.name));
+					console.log('lb token reply: using token from another instance.', window.Name + _ps(window.ScriptInfo.Name), _p('from ' + info.name));
 					list.properties.lBrainzToken[1] = info.lBrainzToken;
 					list.properties.lBrainzEncrypt[1] = info.lBrainzEncrypt;
 					overwriteProperties(list.properties);
@@ -1044,12 +1042,47 @@ if (!list.properties.bSetup[1]) {
 				}
 				break;
 			}
-			case 'scrollbar hidden': {
-				window.RepaintRect(list.x + list.w - list.categoryHeaderOffset, list.y, list.x + list.w, list.y + list.h);
+			case window.ScriptInfo.Name + ': share UI settings': {
+				if (info) { list.applyUiSettings(clone(info)); }
 				break;
 			}
-			case 'Playlist Manager: share UI settings': {
-				if (info) { list.applyUiSettings(clone(info)); }
+			case window.ScriptInfo.Name + ': set colors': { // Needs an array of 5 colors or an object {background, text, headerButtons, buttonsText, buttonsToolbar }
+				if (info && list.properties.bOnNotifyColors[1]) {
+					const colors = clone(info);
+					const getColor = (key) => Object.hasOwn(colors, key) ? colors.background : colors[['background', 'text', 'headerButtons', 'buttonsText', 'buttonsToolbar'].indexOf(key)];
+					const hasColor = (key) => typeof getColor(key) !== 'undefined';
+					if (panel.colors.mode.colorMode !== 0 && hasColor('background')) {
+						panel.colors.customBackground = getColor('background');
+					}
+					if (panel.colors.bCustomText && hasColor('text')) { panel.colors.customText = getColor('text'); }
+					if (panel.colors.headerButtons !== -1 && hasColor('headerButtons')) { panel.colors.headerButtons = getColor('headerButtons'); }
+					if (panel.colors.buttonsTextColor !== -1 && hasColor('buttonsText')) { panel.colors.buttonsTextColor = getColor('buttonsText'); }
+					if (panel.colors.buttonsToolbarColor !== -1 && hasColor('buttonsToolbar')) { panel.colors.buttonsToolbarColor = getColor('buttonsToolbar'); }
+					panel.colorsChanged();
+					if (list.checkConfig({ bResetColors: true, bPreferBgColor: true })) { overwriteProperties(list.properties); } // Ensure related settings is set properly
+					list.repaint();
+				}
+				break;
+			}
+			case 'Colors: set color scheme':
+			case window.ScriptInfo.Name + ': set color scheme': { // Needs an array of at least 6 colors to automatically adjust dynamic colors
+				if (info && list.properties.bOnNotifyColors[1]) {
+					const { main, sec, note, mainAlt, secAlt } = dynamicColors( // eslint-disable-line no-unused-vars
+						clone(info),
+						panel.getColorBackground(),
+						true
+					);
+					if (panel.colors.mode.colorMode !== 0) {
+						panel.colors.customBackground = main;
+					}
+					if (panel.colors.bCustomText) { panel.colors.customText = blendColors(mostContrastColor(panel.getColorBackground()).color, sec, 0.3); }
+					if (panel.colors.headerButtons !== -1) { panel.colors.headerButtons = blendColors(mostContrastColor(panel.getColorBackground()).color, note, 0.6); }
+					if (panel.colors.buttonsTextColor !== -1) { panel.colors.buttonsTextColor = blendColors(mostContrastColor(panel.getColorBackground()).color, note, 0.6); }
+					if (panel.colors.buttonsToolbarColor !== -1) { panel.colors.buttonsToolbarColor = mainAlt; }
+					panel.colorsChanged();
+					if (list.checkConfig({ bResetColors: true, bPreferBgColor: true })) { overwriteProperties(list.properties); } // Ensure related settings is set properly
+					list.repaint();
+				}
 				break;
 			}
 		}
@@ -1058,7 +1091,7 @@ if (!list.properties.bSetup[1]) {
 	// Main menu commands
 	addEventListener('on_main_menu_dynamic', (id) => {
 		if (!list.bInit) { return; }
-		if (list.bDynamicMenus && list.mainMenuDynamic && id < list.mainMenuDynamic.length) {
+		if (list.iDynamicMenus > 0 && list.mainMenuDynamic && id < list.mainMenuDynamic.length) {
 			const menu = list.mainMenuDynamic[id];
 			let bDone = false;
 			switch (menu.type.toLowerCase()) {
@@ -1169,7 +1202,9 @@ if (!list.properties.bSetup[1]) {
 					break;
 				}
 			}
-			console.log('on_main_menu_dynamic: ' + (bDone ? menu.name : JSON.stringify(menu) + ' not found'));
+			if (list.logOpt.mainMenu || !bDone) {
+				console.log('on_main_menu_dynamic: ' + (bDone ? menu.name : JSON.stringify(menu) + ' not found'));
+			}
 		}
 	});
 
@@ -1327,7 +1362,7 @@ if (!list.properties.bSetup[1]) {
 		list.up_btn.hover = list.up_btn.lbtn_up(x, y);
 		list.down_btn.hover = list.down_btn.lbtn_up(x, y);
 		// Check actions per UI element
-		const headerbuttons = Object.keys(list.headerButtons);
+		const headerButtons = Object.keys(list.headerButtons);
 		if (list.traceHeader(x, y)) {
 			if (list.searchInput && list.searchInput.trackCheck(x, y)) { // Search input
 				const trackText = (method) => {
@@ -1340,7 +1375,7 @@ if (!list.properties.bSetup[1]) {
 					action.Effect = dropEffect.none; action.Text = 'Path searching must be enabled';
 				}
 				return;
-			} else if (headerbuttons.some((key) => list.headerButtons[key].inFocus)) { // New playlist button
+			} else if (headerButtons.some((key) => list.headerButtons[key].inFocus)) { // New playlist button
 				if (list.headerButtons.newPls.inFocus) {
 					action.Text = 'Create new Playlist ' + _p((mask & MK_CONTROL) === MK_CONTROL ? 'copy' : 'move');
 				} else {
@@ -1353,7 +1388,7 @@ if (!list.properties.bSetup[1]) {
 				action.Text = '';
 				return;
 			}
-		} else if (bottomToolbar.curBtn !== null || (scroll && scroll.trace(x, y))) { // Scrollbar or buttons
+		} else if (bottomToolbar.curBtn !== null || (scrollBar && scrollBar.trace(x, y))) { // Scrollbar or buttons
 			// else if (bottomToolbar.curBtn !== null || (list.index === -1 && (mask & 32) !== 32)) {action.Effect = dropEffect.none; return;}
 			action.Effect = dropEffect.none;
 			action.Text = '';
@@ -1430,23 +1465,30 @@ if (!list.properties.bSetup[1]) {
 	// key listener (workaround for keys not working when focus is not on panel)
 	const keyListener = {};
 	keyListener.bShift = false;
-	keyListener.bCtrol = false;
+	keyListener.bCtrl = false;
 	keyListener.fn = repeatFn(() => {
 		if (!list.bInit) { return; }
 		if (list.tooltip.bActive) {
 			const bShift = utils.IsKeyPressed(VK_SHIFT);
-			const bCtrol = utils.IsKeyPressed(VK_CONTROL);
-			if (bShift === keyListener.bShift && bCtrol === keyListener.bCtrol) { return; }
-			else if (bShift && bCtrol) { list.move(list.mx, list.my, MK_SHIFT + MK_CONTROL, list.bIsDragDrop); }
+			const bCtrl = utils.IsKeyPressed(VK_CONTROL);
+			if (bShift === keyListener.bShift && bCtrl === keyListener.bCtrl) { return; }
+			else if (bShift && bCtrl) { list.move(list.mx, list.my, MK_SHIFT + MK_CONTROL, list.bIsDragDrop); }
 			else if (bShift) { list.move(list.mx, list.my, MK_SHIFT, list.bIsDragDrop); }
-			else if (bCtrol) { list.move(list.mx, list.my, MK_CONTROL, list.bIsDragDrop); }
+			else if (bCtrl) { list.move(list.mx, list.my, MK_CONTROL, list.bIsDragDrop); }
 			else { list.move(list.mx, list.my, null, list.bIsDragDrop); }
 			keyListener.bShift = bShift;
-			keyListener.bCtrol = bCtrol;
+			keyListener.bCtrl = bCtrl;
 		} else {
-			keyListener.bShift = keyListener.bCtrol = false;
+			keyListener.bShift = keyListener.bCtrl = false;
 		}
 	}, 500)();
+
+	if (list.properties.bOnNotifyColors[1]) { // Ask color-servers at init
+		setTimeout(() => {
+			window.NotifyOthers('Colors: ask color scheme', window.ScriptInfo.Name + ': set color scheme');
+			window.NotifyOthers('Colors: ask colors', window.ScriptInfo.Name + ': set colors');
+		}, 1000);
+	}
 
 	stats.attachCallbacks();
 } else {
