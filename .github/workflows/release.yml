@@ -22,8 +22,10 @@ jobs:
       - name: Check
         if: "!github.event.head_commit || !github.event.head_commit.message || contains(github.event.head_commit.message, 'build:')"
         run: |
-            gh run cancel ${{ github.run_id }} 
-            exit 1
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN}}
       - name: Extract Title
         if: "github.event.head_commit.message && contains(github.event.head_commit.message, 'build:')"
         uses: somaz94/commit-info-extractor@v1
@@ -48,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Result
-        run: echo "Version - Title:" ${{ env.tag }} || ${{ inputs.tag }} " - " ${{ env.title }} || ${{ inputs.title }}
+        run: echo "Version - Title:" ${{ env.tag } || { inputs.tag }} " - " ${ env.title } || { inputs.title }}
   # Check signing key
   check-key:
     needs: [input]
