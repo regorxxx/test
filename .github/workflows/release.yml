@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check
-        if: "!github.event.head_commit || !github.event.head_commit.message || !contains(github.event.head_commit.message, 'build:')"
+        if: "github.event.head_commit && (!github.event.head_commit.message || !contains(github.event.head_commit.message, 'build:'))"
         run: |
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
@@ -46,6 +46,7 @@ jobs:
           fail_on_empty: true
   # Display input
   input:
+    needs: [Automate]
     name: 'Input'
     runs-on: ubuntu-latest
     steps:
