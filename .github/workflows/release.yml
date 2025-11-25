@@ -30,26 +30,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 3
       - name: Extract Title
         if: "github.event.head_commit.message && contains(github.event.head_commit.message, 'build:')"
         uses: somaz94/commit-info-extractor@v1
         with:
-          commit_limit: 10
+          commit_limit: 3
           extract_command: "grep -oP 'build:(.+):v?\\d+\\.\\d+\\.\\d+'"
           pretty: true
           key_variable: 'title'
           fail_on_empty: false
+        run: |
+            echo ${{ env.value_variable  }}
       - name: Extract version
         if: "github.event.head_commit.message && contains(github.event.head_commit.message, 'build:')"
         uses: somaz94/commit-info-extractor@v1
         with:
-          commit_limit: 10
+          commit_limit: 3
           extract_command: "grep -oP 'build:.+:v?(\\d+\\.\\d+\\.\\d+)'"
           pretty: true
           key_variable: 'tag'
           fail_on_empty: true
-      - name: Found
+      - name: Output
         run: |
             echo ${{ env.tag }} " - " ${{ env.title }}
   # Display input
