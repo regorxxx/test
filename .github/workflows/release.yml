@@ -58,7 +58,7 @@ jobs:
       - name: Result
         run: echo "Version - Title:" ${{ env.tag || inputs.tag }} " - " ${{ env.title || inputs.title }}
       - name: Test
-        if:"${{ (env.tag || inputs.tag) == '' }}"
+        if: "${{ (env.tag || inputs.tag) == '' }}"
         run: |
           echo  ${{ (env.tag == '' }}  ${{ (env.tag || inputs.tag) }}  ${{ env.tag }}
           echo "No tag found"
