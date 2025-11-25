@@ -32,7 +32,7 @@ jobs:
         uses: somaz94/commit-info-extractor@v1
         with:
           commit_limit: 10
-          extract_command: "grep -oP 'build:(.+):v\\d+\\.\\d+\\.\\d+'"
+          extract_command: "grep -oP 'build:(.+):v?\\d+\\.\\d+\\.\\d+'"
           pretty: true
           key_variable: 'title'
           fail_on_empty: false
@@ -41,7 +41,7 @@ jobs:
         uses: somaz94/commit-info-extractor@v1
         with:
           commit_limit: 10
-          extract_command: "grep -oP 'build:.+:(v\\d+\\.\\d+\\.\\d+)'"
+          extract_command: "grep -oP 'build:.+:v?(\\d+\\.\\d+\\.\\d+)'"
           pretty: true
           key_variable: 'tag'
           fail_on_empty: true
