@@ -49,6 +49,8 @@ jobs:
           pretty: true
           key_variable: 'tag'
           fail_on_empty: true
+       - name: Output
+         run: echo  ${{ env.tag }} " - "  ${{ env.title }}
   # Display input
   input:
     needs: [Automate]
@@ -60,7 +62,7 @@ jobs:
       - name: Test
         if: ${{ (env.tag || inputs.tag) == '' }}
         run: |
-          echo  ${{ (env.tag || inputs.tag) == '' }}  ${{ (env.tag || inputs.tag) }}  ${{ env.tag }}
+          echo  ${{ (env.tag == '' }}  ${{ (env.tag || inputs.tag) }}  ${{ env.tag }}
           echo "No tag found"
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
